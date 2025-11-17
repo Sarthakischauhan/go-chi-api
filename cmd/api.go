@@ -1,0 +1,62 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/Sarthakischauhan/internal/products"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+type application struct {
+	config config
+}
+
+// add receivers for app object
+func (app *application) mount() http.Handler {
+	r := chi.NewRouter()
+	// middleware layer
+	r.Use(middleware.Logger)
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
+
+	// timeout when returning a response
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("running a new code"))
+	})
+
+	productService := products.NewService()
+	productHandler := products.NewHandler(productService)
+
+	r.Get("/products", productHandler.GetProductsHandler)
+
+	return r
+}
+
+func (app *application) run(h http.Handler) error {
+	srv := &http.Server{
+		Addr:         app.config.addr,
+		Handler:      h,
+		WriteTimeout: time.Second * 30,
+		ReadTimeout:  time.Second * 30,
+		IdleTimeout:  time.Minute,
+	}
+
+	fmt.Printf("Running this app now on: %s", app.config.addr)
+
+	return srv.ListenAndServe()
+}
+
+type config struct {
+	addr string
+	db   dbConfig
+}
+
+type dbConfig struct {
+	dsn string
+}
