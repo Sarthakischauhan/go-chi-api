@@ -37,3 +37,26 @@ func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
 	}
 	return items, nil
 }
+
+const insertProducts = `-- name: InsertProducts :one
+INSERT INTO products (id, name, price)
+VALUES ($1, $2, $3) RETURNING id, name, price, created_at
+`
+
+type InsertProductsParams struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Price int32  `json:"price"`
+}
+
+func (q *Queries) InsertProducts(ctx context.Context, arg InsertProductsParams) (Product, error) {
+	row := q.db.QueryRow(ctx, insertProducts, arg.ID, arg.Name, arg.Price)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.CreatedAt,
+	)
+	return i, err
+}

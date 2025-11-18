@@ -5,13 +5,16 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/Sarthakischauhan/internal/adapters/postgresql/sqlc"
 	"github.com/Sarthakischauhan/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5"
 )
 
 type application struct {
 	config config
+	db     *pgx.Conn
 }
 
 // add receivers for app object
@@ -26,14 +29,15 @@ func (app *application) mount() http.Handler {
 	// timeout when returning a response
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("running a new code"))
-	})
-
-	productService := products.NewService()
+	productService := products.NewService(repo.New(app.db), app.db)
 	productHandler := products.NewHandler(productService)
 
 	r.Get("/products", productHandler.GetProductsHandler)
+	r.Post("/create-product", productHandler.AddProductsHandler)
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("running a new code"))
+	})
 
 	return r
 }
@@ -46,7 +50,6 @@ func (app *application) run(h http.Handler) error {
 		ReadTimeout:  time.Second * 30,
 		IdleTimeout:  time.Minute,
 	}
-
 	fmt.Printf("Running this app now on: %s", app.config.addr)
 
 	return srv.ListenAndServe()

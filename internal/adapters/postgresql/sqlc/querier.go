@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	GetProducts(ctx context.Context) ([]Product, error)
+	InsertProducts(ctx context.Context, arg InsertProductsParams) (Product, error)
 }
 
 var _ Querier = (*Queries)(nil)

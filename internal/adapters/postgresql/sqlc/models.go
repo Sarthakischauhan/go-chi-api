@@ -4,9 +4,13 @@
 
 package repo
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
 type Product struct {
-	ID        int64       `json:"id"`
-	Name      string      `json:"name"`
-	Price     interface{} `json:"price"`
-	CreatedAt interface{} `json:"created_at"`
+	ID        int64              `json:"id"`
+	Name      string             `json:"name"`
+	Price     int32              `json:"price"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

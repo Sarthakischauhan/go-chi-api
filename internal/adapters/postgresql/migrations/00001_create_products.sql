@@ -3,8 +3,8 @@
 CREATE TABLE IF NOT EXISTS products(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    price INTEGERS NOT NULL,
-    created_at TIMESTAMPZ NOT NULL DEFAULT now()
+    price INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 )
 
 -- +goose StatementEnd

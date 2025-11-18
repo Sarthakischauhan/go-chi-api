@@ -19,13 +19,33 @@ func NewHandler(service Service) *handler {
 }
 
 func (h *handler) GetProductsHandler(w http.ResponseWriter, r *http.Request) {
-	err := h.service.GetProducts(r.Context())
-	products := []string{"Sarthak", "Chauhan"}
+	products, err := h.service.GetProducts(r.Context())
+	if err != nil {
+		log.Fatal("Error fetching product records")
+	}
+
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	json.Write(w, http.StatusAccepted, products)
-
 }
+
+func (h *handler) AddProductsHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var productBody createProductParams
+
+	err := json.Read(r, &productBody)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	createdProduct, err := h.service.CreateProduct(r.Context(), productBody)
+
+	json.Write(w, http.StatusAccepted, createdProduct)
+}
+
+// Create handlers for different services here
