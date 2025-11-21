@@ -30,16 +30,6 @@ func (s *svc) GetProducts(ctx context.Context) ([]repo.Product, error) {
 }
 
 func (s *svc) CreateProduct(ctx context.Context, product_info createProductParams) (repo.Product, error) {
-	// do some validation
-
-	// tx, err := s.db.Begin(ctx)
-
-	// if err != nil{
-	// 	return repo.Product{}, err
-	// }
-	// defer tx.Rollback(ctx)
-
-	// qtx := s.repo.withTx(tx)
 	repoParams := repo.InsertProductsParams{
 		ID:    product_info.ID,
 		Name:  product_info.Name,

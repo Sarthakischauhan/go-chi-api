@@ -6,6 +6,7 @@ import (
 	"time"
 
 	repo "github.com/Sarthakischauhan/internal/adapters/postgresql/sqlc"
+	"github.com/Sarthakischauhan/internal/orders"
 	"github.com/Sarthakischauhan/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -32,12 +33,17 @@ func (app *application) mount() http.Handler {
 	productService := products.NewService(repo.New(app.db), app.db)
 	productHandler := products.NewHandler(productService)
 
+	orderService := orders.NewService(repo.New(app.db), app.db)
+	orderHandler := orders.NewHandler(orderService)
+
 	r.Get("/products", productHandler.GetProductsHandler)
 	r.Post("/create-product", productHandler.AddProductsHandler)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("running a new code"))
-	})
+	r.Post("/create-order", orderHandler.CreateOrderHandler)
+
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte("running a new code"))
+	// })
 
 	return r
 }

@@ -21,12 +21,9 @@ func NewHandler(service Service) *handler {
 func (h *handler) GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 	products, err := h.service.GetProducts(r.Context())
 	if err != nil {
-		log.Fatal("Error fetching product records")
-	}
-
-	if err != nil {
-		log.Println(err)
+		log.Println("Error fetching product records:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	json.Write(w, http.StatusAccepted, products)
@@ -44,6 +41,11 @@ func (h *handler) AddProductsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	createdProduct, err := h.service.CreateProduct(r.Context(), productBody)
+
+	if err != nil {
+		log.Println("Error while adding")
+		json.Write(w, http.StatusInternalServerError, createdProduct)
+	}
 
 	json.Write(w, http.StatusAccepted, createdProduct)
 }
