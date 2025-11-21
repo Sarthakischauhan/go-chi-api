@@ -3,9 +3,11 @@ package orders
 import (
 	"context"
 	"log"
+	"time"
 
 	repo "github.com/Sarthakischauhan/internal/adapters/postgresql/sqlc"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service interface {
@@ -38,10 +40,11 @@ func (s *svc) createOrder(ctx context.Context, orderInfo createOrderParams) (rep
 
 	ord, err := qtx.CreateOrder(ctx, repo.CreateOrderParams{
 		CustomerID: orderInfo.CustomerID,
+		CreatedAt:  pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	})
 
 	if err != nil {
-		log.Fatal("Cannot start a new transaction")
+		log.Fatal("Couldn't start a new order", err.Error())
 		return repo.Order{}, err
 	}
 

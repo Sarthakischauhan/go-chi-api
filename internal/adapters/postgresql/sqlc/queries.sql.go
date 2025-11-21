@@ -12,30 +12,28 @@ import (
 )
 
 const createOrder = `-- name: CreateOrder :one
-INSERT INTO orders (id, customer_id, created_at)
-values ($1, $2, $3) RETURNING id, customer_id, created_at
+INSERT INTO orders (customer_id, created_at)
+values ($1, $2) RETURNING id, customer_id, created_at
 `
 
 type CreateOrderParams struct {
-	ID         int64              `json:"id"`
 	CustomerID int64              `json:"customer_id"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, createOrder, arg.ID, arg.CustomerID, arg.CreatedAt)
+	row := q.db.QueryRow(ctx, createOrder, arg.CustomerID, arg.CreatedAt)
 	var i Order
 	err := row.Scan(&i.ID, &i.CustomerID, &i.CreatedAt)
 	return i, err
 }
 
 const createOrderProducts = `-- name: CreateOrderProducts :one
-INSERT INTO order_products (id, order_id, product_id, quantity, price)
-values ($1, $2, $3, $4, $5) RETURNING id, order_id, product_id, quantity, price
+INSERT INTO order_products (order_id, product_id, quantity, price)
+values ($1, $2, $3, $4) RETURNING id, order_id, product_id, quantity, price
 `
 
 type CreateOrderProductsParams struct {
-	ID        int64 `json:"id"`
 	OrderID   int64 `json:"order_id"`
 	ProductID int64 `json:"product_id"`
 	Quantity  int32 `json:"quantity"`
@@ -44,7 +42,6 @@ type CreateOrderProductsParams struct {
 
 func (q *Queries) CreateOrderProducts(ctx context.Context, arg CreateOrderProductsParams) (OrderProduct, error) {
 	row := q.db.QueryRow(ctx, createOrderProducts,
-		arg.ID,
 		arg.OrderID,
 		arg.ProductID,
 		arg.Quantity,

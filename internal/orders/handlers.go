@@ -22,7 +22,7 @@ func (h *handler) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	var ordersPayload createOrderParams
 
 	ctx := r.Context()
-	err := json.Read(r, ordersPayload)
+	err := json.Read(r, &ordersPayload)
 
 	if err != nil {
 		log.Println("Couldn't read the request payload")
